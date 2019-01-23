@@ -1,7 +1,2 @@
-const crypto = require('crypto');
-const hmac = crypto.createHmac('sha256', process.env.BINANCE_SECRET);
-
-module.exports = params => {
-	hmac.update(params);
-	return hmac.digest('hex');
-}
+const CryptoJS = require('crypto-js');
+module.exports = (params) => CryptoJS.HmacSHA256(params, process.env.BINANCE_SECRET).toString();

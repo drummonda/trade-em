@@ -1,5 +1,6 @@
+require("../../secrets.js")
 const axios = require('axios');
-const { generateParams, getArgs } = require('../utils');
+const { generateParams, generateUrl, generateBodyWithSig, getArgs } = require('../utils');
 const { POST: 
 		{ 	
 			NEW_ORDER,
@@ -55,14 +56,14 @@ const generateSig = require('./hash');
 	  "side": "SELL"
 	}
  */
-async function postOrder(symbol, limit=100) {
-	// try {
-	// 	const params = generateParams(getArgs(getOrderBook), [...arguments]);
-	// 	const { data } = await axios.get(SYMBOL_ORDER_BOOK, params);
-	// 	console.log("data", data);
-	// } catch (err) {
-	// 	console.error(err.message);
-	// }
+async function postOrder(symbol, side, type, quantity, timestamp, price=null, timeInForce=null, newClientORderId=null, stopPrice=null, icebergQty=null, newOrderRespType=null, recvWindow=null) {
+	try {
+		let params = generateUrl(getArgs(postTestOrder), [...arguments]);
+		const { data } = await axios.post(NEW_ORDER, generateBodyWithSig(params, generateSig(params)), header);
+		console.log("data", data);
+	} catch (err) {
+		console.error(err.message);
+	}
 }
 
 
@@ -73,10 +74,10 @@ async function postOrder(symbol, limit=100) {
  *
  * Response: {}
  */
-async function postTestOrder(symbol, side, type, timestamp, quantity, timeInForce=null, price=null, newClientORderId=null, stopPrice=null, icebergQty=null, newOrderRespType=null, recvWindow=null) {
+async function postTestOrder(symbol, side, type, quantity, timestamp, price=null, timeInForce=null, newClientORderId=null, stopPrice=null, icebergQty=null, newOrderRespType=null, recvWindow=null) {
 	try {
-		const params = generateParams(getArgs(postTestOrder), [...arguments]);
-		const { data } = await axios.get(NEW_ORDER_TEST, params, header);
+		let params = generateUrl(getArgs(postTestOrder), [...arguments]);
+		const { data } = await axios.post(NEW_ORDER_TEST, generateBodyWithSig(params, generateSig(params)), header);
 		console.log("data", data);
 	} catch (err) {
 		console.error(err.message);

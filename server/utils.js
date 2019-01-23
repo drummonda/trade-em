@@ -11,6 +11,26 @@ const generateParams = (paramKeys, paramValues) => {
 }
 
 /*
+ * Make a req url with params
+ */
+const generateUrl = (paramKeys, paramValues) => {
+  let requestUrl = '';
+  for(let i = 0; i < paramKeys.length; i ++) {
+    if(!paramValues[i]) continue;
+    if(i) requestUrl += '&';
+    requestUrl += `${paramKeys[i]}=${paramValues[i]}`
+  }
+  return requestUrl;
+}
+
+/*
+ * Make a req url with params and a signature
+ */
+const generateBodyWithSig = (params, signature) => {
+  return `${params}&signature=${signature}`;
+}
+
+/*
  * Get the arguments of a function dynamically
  */
 const getArgs = func => {
@@ -29,5 +49,7 @@ const getArgs = func => {
 
 module.exports = {
   generateParams,
+  generateUrl,
+  generateBodyWithSig,
   getArgs
 }
