@@ -56,7 +56,21 @@ const generateSig = require('./hash');
 	  "side": "SELL"
 	}
  */
-async function postOrder(symbol, side, type, quantity, timestamp, price=null, timeInForce=null, newClientORderId=null, stopPrice=null, icebergQty=null, newOrderRespType=null, recvWindow=null) {
+async function postOrder(
+							symbol, 
+							side, 
+							type, 
+							quantity, 
+							timestamp, 
+							price=null, 
+							timeInForce=null, 
+							newClientORderId=null, 
+							stopPrice=null, 
+							icebergQty=null, 
+							newOrderRespType=null, 
+							recvWindow=null
+						) 
+{
 	try {
 		let params = generateUrl(getArgs(postTestOrder), [...arguments]);
 		const { data } = await axios.post(NEW_ORDER, generateBodyWithSig(params, generateSig(params)), header);
@@ -74,15 +88,31 @@ async function postOrder(symbol, side, type, quantity, timestamp, price=null, ti
  *
  * Response: {}
  */
-async function postTestOrder(symbol, side, type, quantity, timestamp, price=null, timeInForce=null, newClientORderId=null, stopPrice=null, icebergQty=null, newOrderRespType=null, recvWindow=null) {
+async function postTestOrder(
+								symbol, 
+								side, 
+								type, 
+								quantity,
+								timestamp,
+								price=null, 
+								timeInForce=null, 
+								newClientORderId=null, 
+								stopPrice=null, 
+								icebergQty=null, 
+								newOrderRespType=null, 
+								recvWindow=null
+							) 
+{
 	try {
 		let params = generateUrl(getArgs(postTestOrder), [...arguments]);
-		const { data } = await axios.post(NEW_ORDER_TEST, generateBodyWithSig(params, generateSig(params)), header);
-		console.log("data", data);
+		const { status } = await axios.post(NEW_ORDER_TEST, generateBodyWithSig(params, generateSig(params)), header);
+		console.log("status", status, "...it's supposed to be 200");
 	} catch (err) {
 		console.error(err.message);
 	}
 }
+
+postTestOrder('BTCUSDT', 'BUY', 'MARKET', 1, Date.now());
 
 module.exports = {
 	postOrder,
