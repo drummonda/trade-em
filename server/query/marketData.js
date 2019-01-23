@@ -1,5 +1,5 @@
 const axios = require('axios');
-const { getUrlWithParams, getArgs } = require('./utils');
+const { generateParams, getArgs } = require('../utils');
 const { GET: 
 		{ 	
 			SYMBOL_ORDER_BOOK,
@@ -11,15 +11,10 @@ const { GET:
 			TICKER_PRICE_CHANGE,
 			SYMBOL_TICKER,
 			BOOK_TICKER,
-			QUERY_ORDER,
-			OPEN_ORDERS,
-			ALL_ORDERS,
-			ACCOUNT_INFO,
-			ACCOUNT_TRADE_LIST,
 		}
 	} = require('../endpoints');
 const { candleStickIntervals: { TWO_HOURS } } = require('../enums');
-console.log("TWO_HOURS", TWO_HOURS);
+
 // MARKET DATA ENDPOINTS
 
 /*
@@ -51,13 +46,14 @@ console.log("TWO_HOURS", TWO_HOURS);
  */
 async function getOrderBook(symbol, limit=100) {
 	try {
-		const requestUrl = getUrlWithParams(SYMBOL_ORDER_BOOK, getArgs(getOrderBook), [...arguments]);
-		const { data } = await axios.get(requestUrl);
+		const params = generateParams(getArgs(getOrderBook), [...arguments]);
+		const { data } = await axios.get(SYMBOL_ORDER_BOOK, params);
 		console.log("data", data);
 	} catch (err) {
 		console.error(err.message);
 	}
 }
+
 
 /*
  *
@@ -81,8 +77,8 @@ async function getOrderBook(symbol, limit=100) {
  */
 async function getRecentTrades(symbol, limit=500) {
 	try {
-		const requestUrl = getUrlWithParams(RECENT_TRADES, getArgs(getRecentTrades), [...arguments]);
-		const { data } = await axios.get(requestUrl);
+		const params = generateParams(getArgs(getRecentTrades), [...arguments]);
+		const { data } = await axios.get(RECENT_TRADES, params);
 		console.log("data", data);
 	} catch (err) {
 		console.error(err.message);
@@ -113,8 +109,8 @@ async function getRecentTrades(symbol, limit=500) {
  */
 async function getHistoricalTrades(symbol, limit=500, fromId=null) {
 	try {
-		const requestUrl = getUrlWithParams(HISTORICAL_TRADES, getArgs(getHistoricalTrades), [...arguments]);
-		const { data } = await axios.get(requestUrl);
+		const params = generateParams(getArgs(getHistoricalTrades), [...arguments]);
+		const { data } = await axios.get(HISTORICAL_TRADES, params);
 		console.log("data", data);
 	} catch (err) {
 		console.error(err.message);
@@ -149,8 +145,8 @@ async function getHistoricalTrades(symbol, limit=500, fromId=null) {
  */
 async function getAggTrades(symbol, fromId=null, startTime=null, endTime=null, limit=500) {
 	try {
-		const requestUrl = getUrlWithParams(AGG_TRADES, getArgs(getAggTrades), [...arguments]);
-		const { data } = await axios.get(requestUrl);
+		const params = generateParams(getArgs(getAggTrades), [...arguments]);
+		const { data } = await axios.get(AGG_TRADES, params);
 		console.log("data", data);
 	} catch (err) {
 		console.error(err.message);
@@ -191,19 +187,148 @@ async function getAggTrades(symbol, fromId=null, startTime=null, endTime=null, l
  */
 async function getCandlestickData(symbol, interval=TWO_HOURS, startTime=null, endTime=null, limit=500) {
 	try {
-		const requestUrl = getUrlWithParams(CANDLE_STICK, getArgs(getCandlestickData), [...arguments]);
-		const { data } = await axios.get(requestUrl);
+		const params = generateParams(getArgs(getCandlestickData), [...arguments]);
+		const { data } = await axios.get(CANDLE_STICK, params);
 		console.log("data", data);
 	} catch (err) {
 		console.error(err.message);
 	}
 }
 
-getCandlestickData('BTCUSDT', TWO_HOURS);
+
+/*
+ *
+ * getAvgPrice
+ * Current average price for a symbol.
+ * Parameters:
+ * 		symbol [STRING]  (MANDATORY)
+ * 
+ * Response:
+ 	{
+	  "mins": 5,
+	  "price": "9.35751834"
+	}
+ */
+async function getAvgPrice(symbol) {
+	try {
+		const params = generateParams(getArgs(getAvgPrice), [...arguments]);
+		const { data } = await axios.get(AVG_PRICE, params);
+		console.log("data", data);
+	} catch (err) {
+		console.error(err.message);
+	}
+}
+
+
+/*
+ *
+ * getPriceChangeStats
+ * 24 hour rolling window price change statistics. Careful when accessing this with no symbol.
+ * Weight: 1 for a single symbol; 40 when the symbol parameter is omitted
+ * Parameters:
+ * 		symbol [STRING]  (NOT MANDATORY)
+ * 
+ * If the symbol is not sent, tickers for all symbols will be returned in an array.
+ *
+ * Response:
+	{
+	  "symbol": "BNBBTC",
+	  "priceChange": "-94.99999800",
+	  "priceChangePercent": "-95.960",
+	  "weightedAvgPrice": "0.29628482",
+	  "prevClosePrice": "0.10002000",
+	  "lastPrice": "4.00000200",
+	  "lastQty": "200.00000000",
+	  "bidPrice": "4.00000000",
+	  "askPrice": "4.00000200",
+	  "openPrice": "99.00000000",
+	  "highPrice": "100.00000000",
+	  "lowPrice": "0.10000000",
+	  "volume": "8913.30000000",
+	  "quoteVolume": "15.30000000",
+	  "openTime": 1499783499040,
+	  "closeTime": 1499869899040,
+	  "firstId": 28385,   // First tradeId
+	  "lastId": 28460,    // Last tradeId
+	  "count": 76         // Trade count
+	}
+ */
+async function getPriceChangeStats(symbol=null) {
+	try {
+		const params = generateParams(getArgs(getPriceChangeStats), [...arguments]);
+		const { data } = await axios.get(TICKER_PRICE_CHANGE, params);
+		console.log("data", data);
+	} catch (err) {
+		console.error(err.message);
+	}
+}
+
+
+/*
+ *
+ * getPrice
+ * Latest price for a symbol or symbols.
+ * Parameters:
+ * 		symbol [STRING]  (NOT MANDATORY)
+ * 
+ * If the symbol is not sent, tickers for all symbols will be returned in an array.
+ *
+ * Response:
+	{
+	  "symbol": "LTCBTC",
+	  "price": "4.00000200"
+	}
+ */
+async function getPrice(symbol=null) {
+	try {
+		const params = generateParams(getArgs(getPrice), [...arguments]);
+		const { data } = await axios.get(SYMBOL_TICKER, params);
+		console.log("data", data);
+	} catch (err) {
+		console.error(err.message);
+	}
+}
+
+
+/*
+ *
+ * getBookTicker
+ * Best price/qty on the order book for a symbol or symbols.
+ * Weight: 1 for a single symbol; 2 when the symbol parameter is omitted
+ *
+ * Parameters:
+ * 		symbol [STRING]  (NOT MANDATORY)
+ * 
+ * If the symbol is not sent, bookTickers for all symbols will be returned in an array.
+ *
+ * Response:
+	{
+	  "symbol": "LTCBTC",
+	  "bidPrice": "4.00000000",
+	  "bidQty": "431.00000000",
+	  "askPrice": "4.00000200",
+	  "askQty": "9.00000000"
+	}
+ */
+async function getBookTicker(symbol=null) {
+	try {
+		const params = generateParams(getArgs(getBookTicker), [...arguments]);
+		const { data } = await axios.get(BOOK_TICKER, params);
+		console.log("data", data);
+	} catch (err) {
+		console.error(err.message);
+	}
+}
 
 
 module.exports = {
 	getOrderBook,
 	getRecentTrades,
-	getHistoricalTrades
+	getHistoricalTrades,
+	getAggTrades,
+	getCandlestickData,
+	getAvgPrice,
+	getPriceChangeStats,
+	getPrice,
+	getBookTicker
 }

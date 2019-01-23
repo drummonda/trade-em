@@ -1,14 +1,13 @@
 /*
  * Make a query with params
  */
-const getUrlWithParams = (endPoint, paramKeys, paramValues) => {
-	let requestUrl = endPoint + '?';
+const generateParams = (paramKeys, paramValues) => {
+	let params = {};
 	for(let i = 0; i < paramKeys.length; i ++) {
 		if(!paramValues[i]) continue;
-		if(i > 0) requestUrl += '&';
-		requestUrl += `${paramKeys[i]}=${paramValues[i]}`;
+		params[paramKeys[i]] = paramValues[i];
 	}
-	return requestUrl;
+	return { params };
 }
 
 /*
@@ -29,6 +28,6 @@ const getArgs = func => {
 }
 
 module.exports = {
-  getUrlWithParams,
+  generateParams,
   getArgs
 }

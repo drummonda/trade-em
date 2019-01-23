@@ -1,9 +1,89 @@
 const axios = require('axios');
-module.exports = async (url, paramsWithSignature, headerConfig) => {
-  try {
-  	const { status } = await axios.post(url, paramsWithSignature, headerConfig)
-  	console.log("if this works status will be 200, actual:", status);
-  } catch (err) {
-    console.error(err);
-  }
+const { generateParams, getArgs } = require('../utils');
+const { POST: 
+		{ 	
+			NEW_ORDER,
+			NEW_ORDER_TEST
+		}
+	} = require('../endpoints');
+const { orderTypes: { LIMIT } } = require('../enums');
+const header = require('./config');
+const generateSig = require('./hash');
+
+// ACCOUNT ENDPOINTS
+
+/*
+ *
+ * postOrder
+ * Send in a new order.
+ * Parameters:
+ * 		symbol  	      [STRING]    (MANDATORY)
+ *		side		      [ENUM]	  (MANDATORY)
+ *		type 		      [ENUM]	  (MANDATORY)
+ *		timeInForce       [ENUM]	  (NOT MANDATORY)
+ *		quantity	      [DECIMAL]	  (MANDATORY)
+ *		price 		      [DECIMAL]	  (NOT MANDATORY)
+ *		newClientORderId  [STRING]	  (NOT MANDATORY)	A unique id for the order. Automatically generated if not sent.
+ *		stopPrice		  [DECIMAL]	  (NOT MANDATORY)	Used with STOP_LOSS, STOP_LOSS_LIMIT, TAKE_PROFIT, and TAKE_PROFIT_LIMIT orders.
+ *		icebergQty		  [DECIMAL]	  (NOT MANDATORY)	Used with LIMIT, STOP_LOSS_LIMIT, and TAKE_PROFIT_LIMIT to create an iceberg order.
+ * 		newORderRespType  [ENUM]	  (NOT MANDATORY)	Set the response JSON. ACK, RESULT, or FULL; MARKET and LIMIT order types default to FULL, all other orders default to ACK.
+ *		recvWindow		  [LONG]	  (NOT MANDATORY)
+ *		timestamp		  [LONG]	  (MANDATORY)
+ * 
+ * Additional mandatory parameters based on type:
+ *		LIMIT				timeInForce, quantity, price
+ *		MARKET				quantity
+ *		STOP_LOSS			quantity, stopPrice
+ *		STOP_LOSS_LIMIT		timeInForce, quantity, price, stopPrice
+ *		TAKE_PROFIT			quantity, stopPrice
+ *		TAKE_PROFIT_LIMIT	timeInForce, quantity, price, stopPrice
+ *		LIMIT_MAKER			quantity, price
+ *
+ * Response:
+	{
+	  "symbol": "BTCUSDT",
+	  "orderId": 28,
+	  "clientOrderId": "6gCrw2kRUAF9CvJDGP16IP",
+	  "transactTime": 1507725176595,
+	  "price": "1.00000000",
+	  "origQty": "10.00000000",
+	  "executedQty": "10.00000000",
+	  "cummulativeQuoteQty": "10.00000000",
+	  "status": "FILLED",
+	  "timeInForce": "GTC",
+	  "type": "MARKET",
+	  "side": "SELL"
+	}
+ */
+async function postOrder(symbol, limit=100) {
+	// try {
+	// 	const params = generateParams(getArgs(getOrderBook), [...arguments]);
+	// 	const { data } = await axios.get(SYMBOL_ORDER_BOOK, params);
+	// 	console.log("data", data);
+	// } catch (err) {
+	// 	console.error(err.message);
+	// }
+}
+
+
+/*
+ *
+ * postTestOrder
+ * Same as above but is just a test order
+ *
+ * Response: {}
+ */
+async function postTestOrder(symbol, side, type, timestamp, quantity, timeInForce=null, price=null, newClientORderId=null, stopPrice=null, icebergQty=null, newOrderRespType=null, recvWindow=null) {
+	try {
+		const params = generateParams(getArgs(postTestOrder), [...arguments]);
+		const { data } = await axios.get(NEW_ORDER_TEST, params, header);
+		console.log("data", data);
+	} catch (err) {
+		console.error(err.message);
+	}
+}
+
+module.exports = {
+	postOrder,
+	postTestOrder
 }
