@@ -1,5 +1,6 @@
 // Generate an endpoint off of the main binance api url
 const main = "https://api.binance.com";
+const socket = "wss://stream.binance.com:9443";
 const generateEndpoint = endPt => `${main}${endPt}`;
 
 module.exports = {
