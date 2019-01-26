@@ -1,6 +1,6 @@
 require("../../secrets.js")
 const axios = require('axios');
-const { generateParams, generateUrl, generateBodyWithSig, getArgs, generateSig } = require('../utils');
+const { generateParams, generateUrl, generateUrlWithSig, generateBodyWithSig, getArgs, generateSig } = require('../utils');
 const header = require('../config');
 const { 
 		orderTypes: { 
@@ -90,8 +90,7 @@ async function openOrder(
 						) 
 {
 	try {
-		let params = generateUrl(getArgs(openOrder), [...arguments]);
-		const { data } = await axios.post(NEW_ORDER, generateBodyWithSig(params, generateSig(params)), header);
+		const { data } = await axios.post(NEW_ORDER, generateBodyWithSig(openOrder, [...arguments]), header);
 		console.log("data", data);
 	} catch (err) {
 		console.error(err.message);
@@ -122,9 +121,8 @@ async function openTestOrder(
 							) 
 {
 	try {
-		let params = generateUrl(getArgs(openTestOrder), [...arguments]);
-		const { status } = await axios.post(NEW_ORDER_TEST, generateBodyWithSig(params, generateSig(params)), header);
-		console.log("status", status, "...it's supposed to be 200");
+		const { data } = await axios.post(NEW_ORDER_TEST, generateBodyWithSig(openTestOrder, [...arguments]), header);
+		console.log("data", data, "...it's supposed to be {}");
 	} catch (err) {
 		console.error(err.message);
 	}
@@ -175,9 +173,7 @@ async function queryOpenOrder(
 							) 
 {
 	try {
-		let params = generateUrl(getArgs(queryOpenOrder), [...arguments]);
-		const bodyWithSig = generateBodyWithSig(params, generateSig(params));
-		const { data } = await axios.get(`${QUERY_ORDER}?${bodyWithSig}`, header);
+		const { data } = await axios.get(generateUrlWithSig(QUERY_ORDER, queryOpenOrder, [...arguments]), header);
 		console.log("data", data);
 	} catch (err) {
 		console.error(err.message);
@@ -227,8 +223,7 @@ async function cancelOpenOrder(
 							) 
 {
 	try {
-		let params = generateUrl(getArgs(cancelOpenOrder), [...arguments]);
-		const { status } = await axios.delete(DELETE_ORDER, generateBodyWithSig(params, generateSig(params)), header);
+		const { status } = await axios.delete(DELETE_ORDER, generateBodyWithSig(cancelOpenOrder, [...arguments]), header);
 		console.log("status", status, "...it's supposed to be 200");
 	} catch (err) {
 		console.error(err.message);
@@ -275,9 +270,7 @@ async function cancelOpenOrder(
  */
 async function queryAllOpenOrders(timestamp, symbol=null, recvWindow=null) {
 	try {
-		let params = generateUrl(getArgs(queryAllOpenOrders), [...arguments]);
-		const bodyWithSig = generateBodyWithSig(params, generateSig(params));
-		const { data } = await axios.get(`${OPEN_ORDERS}?${bodyWithSig}`, header);
+		const { data } = await axios.get(generateUrlWithSig(OPEN_ORDERS, queryAllOpenOrders, [...arguments]), header);
 		console.log("data", data);
 	} catch (err) {
 		console.error(err.message);
@@ -336,9 +329,7 @@ async function queryAllOrders(
 							 ) 
 {
 	try {
-		let params = generateUrl(getArgs(queryAllOrders), [...arguments]);
-		const bodyWithSig = generateBodyWithSig(params, generateSig(params));
-		const { data } = await axios.get(`${ALL_ORDERS}?${bodyWithSig}`, header);
+		const { data } = await axios.get(generateUrlWithSig(ALL_ORDERS, queryAllOrders, [...arguments]), header);
 		console.log("data", data);
 	} catch (err) {
 		console.error(err);

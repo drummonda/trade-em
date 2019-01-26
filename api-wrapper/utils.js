@@ -28,7 +28,18 @@ const generateUrl = (paramKeys, paramValues) => {
 /*
  * Make a req url with params and a signature
  */
-const generateBodyWithSig = (params, signature) => {
+const generateUrlWithSig = (url, func, paramValues) => {
+  const params = generateUrl(getArgs(func), paramValues);
+  const signature = generateSig(params);
+  return `${url}?${params}&signature=${signature}`;
+}
+
+/*
+ * Make a req body with params and a signature
+ */
+const generateBodyWithSig = (func, paramValues) => {
+  const params = generateUrl(getArgs(func), paramValues);
+  const signature = generateSig(params);
   return `${params}&signature=${signature}`;
 }
 
@@ -58,6 +69,7 @@ const generateSig = params => CryptoJS.HmacSHA256(params, process.env.BINANCE_SE
 module.exports = {
   generateParams,
   generateUrl,
+  generateUrlWithSig,
   generateBodyWithSig,
   generateSig,
   getArgs

@@ -92,5 +92,7 @@ async function testUserDataStream() {
 
 
 module.exports = {
-
+	startUserDataStream,
+	keepaliveUserDataStream,
+	closeUserDataStream
 }

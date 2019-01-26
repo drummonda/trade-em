@@ -1,7 +1,7 @@
 require("../../secrets.js")
 const axios = require('axios');
 const header = require('../config');
-const { generateParams, generateUrl, generateBodyWithSig, generateSig, getArgs } = require('../utils');
+const { generateParams, generateUrl, generateUrlWithSig, generateSig, getArgs } = require('../utils');
 const { GET: 
 		{ 	
 			ACCOUNT_INFO,
@@ -46,14 +46,13 @@ const { GET:
  */
 async function getAccountInfo(timestamp, recvWindow=null) {
 	try {
-		let params = generateUrl(getArgs(getAccountInfo), [...arguments]);
-		const bodyWithSig = generateBodyWithSig(params, generateSig(params));
-		const { data } = await axios.get(`${ACCOUNT_INFO}?${bodyWithSig}`, header);
+		const { data } = await axios.get(generateUrlWithSig(ACCOUNT_INFO, getAccountInfo, [...arguments]), header);
 		console.log("data", data);
 	} catch (err) {
 		console.error(err.message);
 	}
 }
+
 
 
 /*
@@ -101,14 +100,14 @@ async function getAccountTradeList(
 								  ) 
 {
 	try {
-		let params = generateUrl(getArgs(getAccountTradeList), [...arguments]);
-		const bodyWithSig = generateBodyWithSig(params, generateSig(params));
-		const { data } = await axios.get(`${ACCOUNT_TRADE_LIST}?${bodyWithSig}`, header);
+		const { data } = await axios.get(generateUrlWithSig(ACCOUNT_TRADE_LIST, getAccountTradeList, [...arguments]), header);
 		console.log("data", data);
 	} catch (err) {
 		console.error(err.message);
 	}
 }
+
+getAccountTradeList('BNBBTC', Date.now());
 
 
 module.exports = {
