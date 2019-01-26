@@ -1,6 +1,5 @@
 const axios = require('axios');
-const WebSocket = require('ws');
-const initializeConnection = require('./config');
+const { initializeConnection, generateStream } = require('./config');
 const generateStreamName = require('./utils');
 const { 
 		STREAM: {
@@ -17,6 +16,10 @@ const {
 		} 
 } = require('../endpoints');
 
+ 
+/*
+ * Generate a new websocket based on a url, and initialize it
+ */
 
 /*
  * aggregateTradeStream
@@ -38,10 +41,7 @@ const {
 	  "M": true         // Ignore
  *	}
  */
-async function openAggTradeStream(symbol) {
-	const ws = new WebSocket(AGG_TRADE(symbol));
-	initializeConnection(ws);
-}
+const openAggTradeStream = symbol => generateStream(AGG_TRADE, symbol);
 
 
 /*
@@ -64,10 +64,7 @@ async function openAggTradeStream(symbol) {
 	  "M": true         // Ignore
  *	}
  */
-async function openTradeStream(symbol) {
-	const ws = new WebSocket(TRADE(symbol));
-	initializeConnection(ws);
-}
+const openTradeStream = symbol => generateStream(TRADE, symbol);
 
 
 /*
@@ -101,14 +98,193 @@ async function openTradeStream(symbol) {
 	  }
  *	}
  */
-async function openKlineStream(symbol, interval) {
-	const ws = new WebSocket(KLINE(symbol, interval));
-	initializeConnection(ws);
-}
+const openKlineStream = (symbol, interval) => generateStream(KLINE, symbol, interval)
 
-openAggTradeStream('bnbbtc');
+
+/*
+ * openMiniTickerStream
+ * 24hr rolling window mini-ticker statistics for a single symbol pushed every second. 
+ * These are NOT the statistics of the UTC day, but a 24hr rolling window from requestTime to 24hrs before.
+ * Stream Name: <symbol>@miniTicker
+ * 
+ * Payload:
+ * {
+    "e": "24hrMiniTicker",  // Event type
+    "E": 123456789,         // Event time
+    "s": "BNBBTC",          // Symbol
+    "c": "0.0025",          // Close price
+    "o": "0.0010",          // Open price
+    "h": "0.0025",          // High price
+    "l": "0.0010",          // Low price
+    "v": "10000",           // Total traded base asset volume
+    "q": "18"               // Total traded quote asset volume
+ * }
+ */
+const openMiniTickerStream = symbol => generateStream(MINI, symbol);
+
+
+
+
+/*
+ * openAllMarketMiniTickerStream
+ * 24hr rolling window mini-ticker statistics for all symbols that changed in an array pushed every second. 
+ * These are NOT the statistics of the UTC day, but a 24hr rolling window from requestTime to 24hrs before.
+ * Stream Name: !miniTicker@arr
+ * 
+ * Payload:
+ * {
+    "e": "24hrMiniTicker",  // Event type
+    "E": 123456789,         // Event time
+    "s": "BNBBTC",          // Symbol
+    "c": "0.0025",          // Close price
+    "o": "0.0010",          // Open price
+    "h": "0.0025",          // High price
+    "l": "0.0010",          // Low price
+    "v": "10000",           // Total traded base asset volume
+    "q": "18"               // Total traded quote asset volume
+ * }
+ */
+const openAllMarketMiniTickerStream = () => generateStream(ALL_MINI);
+
+
+/*
+ * openTickerStream
+ * 24hr rollwing window ticker statistics for a single symbol pushed every second. 
+ * These are NOT the statistics of the UTC day, but a 24hr rolling window from requestTime to 24hrs before.
+ * Stream Name: <symbol>@ticker
+ * 
+ * Payload:
+ * {
+	  "e": "24hrTicker",  // Event type
+	  "E": 123456789,     // Event time
+	  "s": "BNBBTC",      // Symbol
+	  "p": "0.0015",      // Price change
+	  "P": "250.00",      // Price change percent
+	  "w": "0.0018",      // Weighted average price
+	  "x": "0.0009",      // First trade(F)-1 price (first trade before the 24hr rolling window)
+	  "c": "0.0025",      // Last price
+	  "Q": "10",          // Last quantity
+	  "b": "0.0024",      // Best bid price
+	  "B": "10",          // Best bid quantity
+	  "a": "0.0026",      // Best ask price
+	  "A": "100",         // Best ask quantity
+	  "o": "0.0010",      // Open price
+	  "h": "0.0025",      // High price
+	  "l": "0.0010",      // Low price
+	  "v": "10000",       // Total traded base asset volume
+	  "q": "18",          // Total traded quote asset volume
+	  "O": 0,             // Statistics open time
+	  "C": 86400000,      // Statistics close time
+	  "F": 0,             // First trade ID
+	  "L": 18150,         // Last trade Id
+	  "n": 18151          // Total number of trades
+ *	}
+ */
+const openTickerStream = symbol => generateStream(TICKER, symbol);
+
+
+/*
+ * openAllMarketTickerStream
+ * 24hr rolling window ticker statistics for all symbols that changed in an array pushed every second. 
+ * These are NOT the statistics of the UTC day, but a 24hr rolling window from requestTime to 24hrs before.
+ * Stream Name: !ticker@arr
+ * 
+ * Payload:
+ * {
+	  "e": "24hrTicker",  // Event type
+	  "E": 123456789,     // Event time
+	  "s": "BNBBTC",      // Symbol
+	  "p": "0.0015",      // Price change
+	  "P": "250.00",      // Price change percent
+	  "w": "0.0018",      // Weighted average price
+	  "x": "0.0009",      // First trade(F)-1 price (first trade before the 24hr rolling window)
+	  "c": "0.0025",      // Last price
+	  "Q": "10",          // Last quantity
+	  "b": "0.0024",      // Best bid price
+	  "B": "10",          // Best bid quantity
+	  "a": "0.0026",      // Best ask price
+	  "A": "100",         // Best ask quantity
+	  "o": "0.0010",      // Open price
+	  "h": "0.0025",      // High price
+	  "l": "0.0010",      // Low price
+	  "v": "10000",       // Total traded base asset volume
+	  "q": "18",          // Total traded quote asset volume
+	  "O": 0,             // Statistics open time
+	  "C": 86400000,      // Statistics close time
+	  "F": 0,             // First trade ID
+	  "L": 18150,         // Last trade Id
+	  "n": 18151          // Total number of trades
+ *	}
+ */
+const openAllMarketTickerStream = () => generateStream(ALL_TICKER);
+
+
+/*
+ * openPartialBookDepthStream
+ * Top <levels> bids and asks, pushed every second. Valid <levels> are 5, 10, or 20.
+ * Stream Name:  <symbol>@depth<levels>
+ * 
+ * Payload:
+ * {
+	  "lastUpdateId": 160,  // Last update ID
+	  "bids": [             // Bids to be updated
+	    [
+	      "0.0024",         // Price level to be updated
+	      "10",             // Quantity
+	      []                // Ignore
+	    ]
+	  ],
+	  "asks": [             // Asks to be updated
+	    [
+	      "0.0026",         // Price level to be updated
+	      "100",            // Quantity
+	      []                // Ignore
+	    ]
+	  ]
+ *	}
+ */
+const openPartialBookDepthStream = (symbol, levels) => generateStream(PARTIAL_BOOK_DEPTH, symbol, levels);
+
+
+/*
+ * openDiffDepthStream
+ * Order book price and quantity depth updates used to locally manage an order book pushed every second.
+ * Stream Name:  <symbol>@depth
+ * 
+ * Payload:
+ *  {
+	  "e": "depthUpdate", // Event type
+	  "E": 123456789,     // Event time
+	  "s": "BNBBTC",      // Symbol
+	  "U": 157,           // First update ID in event
+	  "u": 160,           // Final update ID in event
+	  "b": [              // Bids to be updated
+	    [
+	      "0.0024",       // Price level to be updated
+	      "10",
+	      []              // Ignore
+	    ]
+	  ],
+	  "a": [              // Asks to be updated
+	    [
+	      "0.0026",       // Price level to be updated
+	      "100",          // Quantity
+	      []              // Ignore
+	    ]
+	  ]
+ *	}
+ */
+const openDiffDepthStream = symbol => generateStream(DIFF_DEPTH, symbol);
+
 
 module.exports = {
 	openAggTradeStream,
-	openTradeStream
+	openTradeStream,
+	openKlineStream,
+	openMiniTickerStream,
+	openAllMarketMiniTickerStream,
+	openTickerStream,
+	openAllMarketTickerStream,
+	openPartialBookDepthStream,
+	openDiffDepthStream
 }

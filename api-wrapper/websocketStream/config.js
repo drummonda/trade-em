@@ -1,7 +1,8 @@
+const WebSocket = require('ws');
 /*
  * Initialize a WebSocket connection
  */
-module.exports = ws => {
+const initializeConnection = ws => {
 	// what to do on opening a socket connection
 	ws.on('open', () => {
 		console.log("Someone shook my hand");
@@ -19,6 +20,20 @@ module.exports = ws => {
 
 	// what to do when the socket receives a message
 	ws.on('message',  data => {
-		console.log("fuck yeah we got some data", data);
+		const parsed = JSON.parse(data);
+		console.log("fuck yeah we got some data", parsed);
 	});
+}
+
+/*
+ * Generate a websocket connection
+ */
+const generateStream = (TYPE, ...args) => {
+	const ws = new WebSocket(TYPE(...args));
+	initializeConnection(ws);
+}
+
+module.exports = {
+	initializeConnection,
+	generateStream
 }
