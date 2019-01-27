@@ -1,5 +1,5 @@
 const CryptoJS = require('crypto-js');
-
+const axios = require('axios');
 /*
  * Make a query with params
  */
@@ -10,19 +10,6 @@ const generateParams = (paramKeys, paramValues) => {
 		params[paramKeys[i]] = paramValues[i];
 	}
 	return { params };
-}
-
-/*
- * Make a req url with params
- */
-const generateUrl = (paramKeys, paramValues) => {
-  let requestUrl = '';
-  for(let i = 0; i < paramKeys.length; i ++) {
-    if(!paramValues[i]) continue;
-    if(i) requestUrl += '&';
-    requestUrl += `${paramKeys[i]}=${paramValues[i]}`
-  }
-  return requestUrl;
 }
 
 /*
@@ -44,6 +31,34 @@ const generateBodyWithSig = (func, paramValues) => {
 }
 
 /*
+ * Make a request body based off an object input
+ */
+const generateBody = (args, timestamp=false) => {
+  let params = "";
+  args = timestamp ? {...args, timestamp: Date.now() } : args;
+  Object.keys(args).forEach(key => {
+    params += `${key}=${args[key]}&`
+  })
+  params = params.slice(0, -1);
+  const signature = generateSig(params);
+  return `${params}&signature=${signature}`;
+}
+
+/*
+ * Make a request url based off an object input
+ */
+const generateUrl = (url, args, timestamp=false) => {
+  let params = "";
+  args = timestamp ? {...args, timestamp: Date.now() } : args;
+  Object.keys(args).forEach(key => {
+    params += `${key}=${args[key]}&`
+  })
+  params = params.slice(0, -1);
+  const signature = generateSig(params);
+  return `${url}?${params}&signature=${signature}`;
+}
+
+/*
  * Get the arguments of a function dynamically
  */
 const getArgs = func => {
@@ -60,6 +75,52 @@ const getArgs = func => {
   });
 }
 
+/*
+ * Generate an api config
+ */
+const generateConfig = (url, method, params=null, headers={}, auth=false) => {
+  switch(method) {
+    case 'get':
+      return { 
+                method, 
+                url: params ? generateUrl(url, params, true) : url, // don't do anything to url if no params
+                headers 
+              };
+
+    case 'post':
+      return { 
+                method, 
+                url, 
+                data: generateBody(params, auth), 
+                headers 
+              };
+
+    case 'put':
+      return {};
+
+    case 'delete':
+      return { 
+                method, 
+                url, 
+                data: generateBody(params, auth), 
+                headers 
+              };
+  }
+}
+
+
+/*
+ * Generate an api request by params
+ */
+const request = async (url, method, params=null, headers={}, auth=false) => { 
+  try {
+    const { data } = await axios(generateConfig(url, method, params, headers, auth));
+    console.log("data", data);
+  } catch (err) {
+    console.error(err)
+  }
+}
+
 
 /*
  * Hash query params
@@ -71,6 +132,9 @@ module.exports = {
   generateUrl,
   generateUrlWithSig,
   generateBodyWithSig,
+  generateBody,
   generateSig,
+  generateConfig,
+  request,
   getArgs
 }

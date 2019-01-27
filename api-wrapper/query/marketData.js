@@ -1,5 +1,5 @@
 const axios = require('axios');
-const { generateParams, getArgs } = require('../utils');
+const { request } = require('../utils');
 const { GET: 
 		{ 	
 			SYMBOL_ORDER_BOOK,
@@ -44,15 +44,19 @@ const { candleStickIntervals: { TWO_HOURS } } = require('../enums');
 	  ]
 	}
  */
-async function getOrderBook(symbol, limit=100) {
-	try {
-		const params = generateParams(getArgs(getOrderBook), [...arguments]);
-		const { data } = await axios.get(SYMBOL_ORDER_BOOK, params);
-		console.log("data", data);
-	} catch (err) {
-		console.error(err.message);
-	}
-}
+const getOrderBook = params => request(SYMBOL_ORDER_BOOK, 'get', params);
+// 	try {
+// 		const params = generateParams(getArgs(getOrderBook), [...arguments]);
+// 		const { data } = await axios.get(SYMBOL_ORDER_BOOK, params);
+// 		console.log("data", data);
+// 	} catch (err) {
+// 		console.error(err.message);
+// 	}
+// }
+
+getOrderBook({
+	symbol: 'BNBBTC'
+})
 
 
 /*

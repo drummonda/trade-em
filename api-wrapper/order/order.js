@@ -1,7 +1,6 @@
 require("../../secrets.js")
-const axios = require('axios');
-const { generateParams, generateUrl, generateUrlWithSig, generateBodyWithSig, getArgs, generateSig } = require('../utils');
-const header = require('../config');
+const { request } = require('../utils');
+const { headers } = require('../config');
 const { 
 		orderTypes: { 
 			LIMIT,
@@ -28,6 +27,7 @@ const {
 			DELETE_ORDER
 		}
 	} = require('../endpoints');
+
 
 // ACCOUNT ENDPOINTS
 
@@ -74,28 +74,7 @@ const {
 	  "side": "SELL"
 	}
  */
-async function openOrder(
-							symbol, 
-							side, 
-							type, 
-							quantity, 
-							timestamp, 
-							price=null, 
-							timeInForce=null, 
-							newClientORderId=null, 
-							stopPrice=null, 
-							icebergQty=null, 
-							newOrderRespType=null, 
-							recvWindow=null
-						) 
-{
-	try {
-		const { data } = await axios.post(NEW_ORDER, generateBodyWithSig(openOrder, [...arguments]), header);
-		console.log("data", data);
-	} catch (err) {
-		console.error(err.message);
-	}
-}
+const openOrder = params => request(NEW_ORDER, 'post', order, headers, true)
 
 
 /*
@@ -105,28 +84,7 @@ async function openOrder(
  *
  * Response: {}
  */
-async function openTestOrder(
-								symbol, 
-								side, 
-								type, 
-								quantity,
-								timestamp,
-								price=null, 
-								timeInForce=null, 
-								newClientORderId=null, 
-								stopPrice=null, 
-								icebergQty=null, 
-								newOrderRespType=null, 
-								recvWindow=null
-							) 
-{
-	try {
-		const { data } = await axios.post(NEW_ORDER_TEST, generateBodyWithSig(openTestOrder, [...arguments]), header);
-		console.log("data", data, "...it's supposed to be {}");
-	} catch (err) {
-		console.error(err.message);
-	}
-}
+const openTestOrder = async params => request(NEW_ORDER_TEST, 'post', params, headers, true);
 
 
 /*
@@ -164,21 +122,8 @@ async function openTestOrder(
 	  "isWorking": true
 	}
  */
-async function queryOpenOrder(
-								symbol,
-								orderId,
-								timestamp,
-								origClientOrderId=null,
-								recvWindow=null
-							) 
-{
-	try {
-		const { data } = await axios.get(generateUrlWithSig(QUERY_ORDER, queryOpenOrder, [...arguments]), header);
-		console.log("data", data);
-	} catch (err) {
-		console.error(err.message);
-	}
-}
+const queryOpenOrder = async params => request(QUERY_ORDER, 'get', params, headers, true);
+
 
 
 /*
@@ -213,22 +158,7 @@ async function queryOpenOrder(
 	  "side": "SELL"
 	}
  */
-async function cancelOpenOrder(
-								symbol,
-								orderId,
-								timestamp,
-								origClientOrderId=null,
-								newClientOrderId=null,
-								recvWindow=null
-							) 
-{
-	try {
-		const { status } = await axios.delete(DELETE_ORDER, generateBodyWithSig(cancelOpenOrder, [...arguments]), header);
-		console.log("status", status, "...it's supposed to be 200");
-	} catch (err) {
-		console.error(err.message);
-	}
-}
+const cancelOpenOrder = async params => request(DELETE_ORDER, 'delete', params, headers, true);
 
 
 /*
@@ -268,14 +198,14 @@ async function cancelOpenOrder(
 	  }
 	]
  */
-async function queryAllOpenOrders(timestamp, symbol=null, recvWindow=null) {
-	try {
-		const { data } = await axios.get(generateUrlWithSig(OPEN_ORDERS, queryAllOpenOrders, [...arguments]), header);
-		console.log("data", data);
-	} catch (err) {
-		console.error(err.message);
-	}
-}
+const queryAllOpenOrders = async params => request(OPEN_ORDERS, 'get', params, headers, true);
+// 	try {
+// 		const { data } = await axios.get(generateUrlWithSig(OPEN_ORDERS, queryAllOpenOrders, [...arguments]), header);
+// 		console.log("data", data);
+// 	} catch (err) {
+// 		console.error(err.message);
+// 	}
+// }
 
 
 /*
@@ -318,23 +248,8 @@ async function queryAllOpenOrders(timestamp, symbol=null, recvWindow=null) {
 	  }
 	]
  */
-async function queryAllOrders(
-								symbol,
-								timestamp,
-								orderId,
-								startTime=null,
-								endTime=null,
-								limit=500, 
-								recvWindow=null,
-							 ) 
-{
-	try {
-		const { data } = await axios.get(generateUrlWithSig(ALL_ORDERS, queryAllOrders, [...arguments]), header);
-		console.log("data", data);
-	} catch (err) {
-		console.error(err);
-	}
-}
+const queryAllOrders = params => request(ALL_ORDERS, 'get', params, headers, true);
+
 
 
 module.exports = {

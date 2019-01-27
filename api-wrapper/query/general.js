@@ -1,4 +1,5 @@
 const axios = require('axios');
+const { request } = require('../utils');
 const { GET: 
 		{ 	
 			PING,
@@ -6,14 +7,6 @@ const { GET:
 			EXCHANGE_INFO
 		}
 	} = require('../endpoints');
-
-/*
- * Create a simple get query that requires no parameters
- */
-const simpleGetQuery = endPoint => async () => {
-	const { data } = await axios.get(endPoint);
-	console.log("data", data);
-}
 
 // GENERAL ENDPOINTS
 
@@ -24,7 +17,7 @@ const simpleGetQuery = endPoint => async () => {
  * Parameters: NONE
  * 
  */
-const pingServer = simpleGetQuery(PING);
+const pingServer = () => request(PING, 'get');
 
 /*
  *
@@ -33,7 +26,8 @@ const pingServer = simpleGetQuery(PING);
  * Parameters: NONE
  * 
  */
-const getServerTime = simpleGetQuery(TIME);
+const getServerTime = () => request(TIME, 'get');
+
 
 /*
  *
@@ -42,7 +36,7 @@ const getServerTime = simpleGetQuery(TIME);
  * Parameters: NONE
  * 
  */
-const getExchangeInfo = simpleGetQuery(EXCHANGE_INFO);
+const getExchangeInfo = () => request(EXCHANGE_INFO, 'get');
 
 
 module.exports = {
