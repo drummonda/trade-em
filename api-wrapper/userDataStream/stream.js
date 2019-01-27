@@ -1,6 +1,7 @@
 require("../../secrets.js")
 const axios = require('axios');
-const header = require('../config');
+const { headers } = require('../config');
+const { request } = require('../utils');
 const { POST: { NEW_USER_DATA_STREAM },
 		PUT: { KEEPALIVE_USER_DATA_STREAM },
 		DELETE: { CLOSE_USER_DATA_STREAM }
@@ -20,15 +21,7 @@ const { POST: { NEW_USER_DATA_STREAM },
 	}
  *
  */
-async function startUserDataStream() {
-	try {
-		const { data: { listenKey } } = await axios.post(NEW_USER_DATA_STREAM, null, header);
-		console.log('listenKey', listenKey);
-		return listenKey;
-	} catch(err) {
-		console.error(err.message);
-	}
-}
+const startUserDataStream = () => request(NEW_USER_DATA_STREAM, 'post', {}, headers)
 
 
 /*
@@ -43,14 +36,14 @@ async function startUserDataStream() {
  * Response:
  * 	{}
  */
-async function keepaliveUserDataStream(listenKey) {
-	try {
-		const { data } = await axios.put(KEEPALIVE_USER_DATA_STREAM, `listenKey=${listenKey}`, header);
-		console.log('data stream was kept alive', data);
-	} catch(err) {
-		console.error(err.message);
-	}
-}
+const keepaliveUserDataStream = listenKey => request(KEEPALIVE_USER_DATA_STREAM, 'put', { listenKey }, headers);
+// 	try {
+// 		const { data } = await axios.put(KEEPALIVE_USER_DATA_STREAM, `listenKey=${listenKey}`, header);
+// 		console.log('data stream was kept alive', data);
+// 	} catch(err) {
+// 		console.error(err.message);
+// 	}
+// }
 
 
 /*
@@ -66,14 +59,14 @@ async function keepaliveUserDataStream(listenKey) {
  * 	{}
  * 
  */
-async function closeUserDataStream(listenKey) {
-	try {
-		const { data } = await axios.delete(CLOSE_USER_DATA_STREAM, { data: `listenKey=${listenKey}`, headers: header.headers });
-		console.log('data stream was closed', data);
-	} catch(err) {
-		console.error(err);
-	}
-}
+const closeUserDataStream = listenKey => request(CLOSE_USER_DATA_STREAM, 'delete', { listenKey }, headers);
+// 	try {
+// 		const { data } = await axios.delete(CLOSE_USER_DATA_STREAM, { data: `listenKey=${listenKey}`, headers: header.headers });
+// 		console.log('data stream was closed', data);
+// 	} catch(err) {
+// 		console.error(err);
+// 	}
+// }
 
 
 /*
@@ -84,8 +77,7 @@ async function closeUserDataStream(listenKey) {
  */
 
 async function testUserDataStream() {
-	const listenKey = await startUserDataStream();
-	console.log("got the key", listenKey);
+	const {listenKey} = await startUserDataStream();
 	await keepaliveUserDataStream(listenKey);
 	await closeUserDataStream(listenKey);
 }

@@ -1,53 +1,29 @@
 const CryptoJS = require('crypto-js');
 const axios = require('axios');
-/*
- * Make a query with params
- */
-const generateParams = (paramKeys, paramValues) => {
-	let params = {};
-	for(let i = 0; i < paramKeys.length; i ++) {
-		if(!paramValues[i]) continue;
-		params[paramKeys[i]] = paramValues[i];
-	}
-	return { params };
-}
 
-/*
- * Make a req url with params and a signature
- */
-const generateUrlWithSig = (url, func, paramValues) => {
-  const params = generateUrl(getArgs(func), paramValues);
-  const signature = generateSig(params);
-  return `${url}?${params}&signature=${signature}`;
-}
-
-/*
- * Make a req body with params and a signature
- */
-const generateBodyWithSig = (func, paramValues) => {
-  const params = generateUrl(getArgs(func), paramValues);
-  const signature = generateSig(params);
-  return `${params}&signature=${signature}`;
-}
 
 /*
  * Make a request body based off an object input
  */
-const generateBody = (args, timestamp=false) => {
+const generateBody = (args, auth) => {
   let params = "";
-  args = timestamp ? {...args, timestamp: Date.now() } : args;
+  args = auth ? {...args, timestamp: Date.now() } : args;
   Object.keys(args).forEach(key => {
     params += `${key}=${args[key]}&`
   })
   params = params.slice(0, -1);
-  const signature = generateSig(params);
-  return `${params}&signature=${signature}`;
+  if(auth) {
+    const signature = generateSig(params);
+    return `${params}&signature=${signature}`;
+  } else {
+    return params;
+  }
 }
 
 /*
  * Make a request url based off an object input
  */
-const generateUrl = (url, args, timestamp=false) => {
+const generateUrlWithSig = (url, args, timestamp=false) => {
   let params = "";
   args = timestamp ? {...args, timestamp: Date.now() } : args;
   Object.keys(args).forEach(key => {
@@ -59,46 +35,44 @@ const generateUrl = (url, args, timestamp=false) => {
 }
 
 /*
- * Get the arguments of a function dynamically
+ * Make a req url with params
  */
-const getArgs = func => {
-  // First match everything inside the function argument parens.
-  const args = func.toString().match(/function\s.*?\(([^)]*)\)/)[1];
-  // Split the arguments string into an array comma delimited.
-  return args.split(',').map(arg => {
-    const noDefault = arg.split("=")[0];
-    // Ensure no inline comments are parsed and trim the whitespace.
-    return noDefault.replace(/\/\*.*\*\//, '').trim();
-  }).filter(function(arg) {
-    // Ensure no undefined values are added.
-    return arg;
-  });
+const generateUrlWithParams = (url, params) => {
+  let requestUrl = `${url}?`;
+  Object.keys(params).forEach((key, idx) => {
+    if(idx) requestUrl += '&';
+    requestUrl += `${key}=${params[key]}`
+  })
+  return requestUrl;
 }
+
+/*
+ * Generate a url
+ */
+const generateUrl = (url, params=false, auth=false) => {
+  if(auth) {
+    return generateUrlWithSig(url, params, true);
+  } else if(params) {
+    return generateUrlWithParams(url, params)
+  } else {
+    return url;
+  }
+}
+
 
 /*
  * Generate an api config
  */
-const generateConfig = (url, method, params=null, headers={}, auth=false) => {
+const generateConfig = (url, method, params=false, headers={}, auth=false) => {
   switch(method) {
     case 'get':
       return { 
                 method, 
-                url: params ? generateUrl(url, params, true) : url, // don't do anything to url if no params
-                headers 
+                url: generateUrl(url, params, auth), // don't do anything to url if no params
+                headers
               };
 
-    case 'post':
-      return { 
-                method, 
-                url, 
-                data: generateBody(params, auth), 
-                headers 
-              };
-
-    case 'put':
-      return {};
-
-    case 'delete':
+    default:
       return { 
                 method, 
                 url, 
@@ -116,8 +90,9 @@ const request = async (url, method, params=null, headers={}, auth=false) => {
   try {
     const { data } = await axios(generateConfig(url, method, params, headers, auth));
     console.log("data", data);
+    return data;
   } catch (err) {
-    console.error(err)
+    console.error(err.message);
   }
 }
 
@@ -128,13 +103,9 @@ const request = async (url, method, params=null, headers={}, auth=false) => {
 const generateSig = params => CryptoJS.HmacSHA256(params, process.env.BINANCE_SECRET).toString();
 
 module.exports = {
-  generateParams,
   generateUrl,
   generateUrlWithSig,
-  generateBodyWithSig,
-  generateBody,
   generateSig,
   generateConfig,
   request,
-  getArgs
 }
