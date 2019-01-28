@@ -31,6 +31,7 @@ const initializeConnection = ws => {
 const generateStream = (TYPE, ...args) => {
 	const ws = new WebSocket(TYPE(...args));
 	initializeConnection(ws);
+	return ws;
 }
 
 module.exports = {

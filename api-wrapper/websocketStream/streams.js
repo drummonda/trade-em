@@ -1,6 +1,5 @@
 const axios = require('axios');
 const { initializeConnection, generateStream } = require('./config');
-const generateStreamName = require('./utils');
 const { 
 		STREAM: {
 			BASE,
