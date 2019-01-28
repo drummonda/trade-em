@@ -10,12 +10,12 @@ const initializeConnection = ws => {
 
 	// what to do when there is a socket error
 	ws.on('close', () => {
-		console.log("Ouch that burns, no more socket");
+		console.log("Ouchie that burns, no more socket");
 	});
 
 	// what was the error, if any
 	ws.on('error', err => {
-		console.log("error was", error);
+		console.log("error was", err);
 	})
 
 	// what to do when the socket receives a message

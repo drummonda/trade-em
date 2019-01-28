@@ -123,8 +123,6 @@ const openKlineStream = (symbol, interval) => generateStream(KLINE, symbol, inte
 const openMiniTickerStream = symbol => generateStream(MINI, symbol);
 
 
-
-
 /*
  * openAllMarketMiniTickerStream
  * 24hr rolling window mini-ticker statistics for all symbols that changed in an array pushed every second. 

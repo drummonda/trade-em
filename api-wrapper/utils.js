@@ -1,6 +1,10 @@
 const CryptoJS = require('crypto-js');
 const axios = require('axios');
 
+/*
+ * Hash query params
+ */
+const generateSig = params => CryptoJS.HmacSHA256(params, process.env.BINANCE_SECRET).toString();
 
 /*
  * Make a request body based off an object input
@@ -88,19 +92,14 @@ const generateConfig = (url, method, params=false, headers={}, auth=false) => {
  */
 const request = async (url, method, params=null, headers={}, auth=false) => { 
   try {
-    const { data } = await axios(generateConfig(url, method, params, headers, auth));
-    console.log("data", data);
+    const { data, status } = await axios(generateConfig(url, method, params, headers, auth));
+    console.log("status was: ", status, "and got some data..?", data);
     return data;
   } catch (err) {
     console.error(err.message);
   }
 }
 
-
-/*
- * Hash query params
- */
-const generateSig = params => CryptoJS.HmacSHA256(params, process.env.BINANCE_SECRET).toString();
 
 module.exports = {
   generateUrl,
