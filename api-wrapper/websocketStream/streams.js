@@ -1,4 +1,5 @@
 const axios = require('axios');
+const WebSocket = require('ws');
 const { initializeConnection, generateStream } = require('./config');
 const { 
 		STREAM: {
@@ -12,7 +13,19 @@ const {
 			ALL_TICKER,
 			PARTIAL_BOOK_DEPTH,
 			DIFF_DEPTH
-		} 
+		},
+		STREAM_TYPE: {
+			BASE_TYPE,
+			AGG_TRADE_TYPE,
+			TRADE_TYPE,
+			KLINE_TYPE,
+			MINI_TYPE,
+			ALL_MINI_TYPE,
+			TICKER_TYPE,
+			ALL_TICKER_TYPE,
+			PARTIAL_BOOK_DEPTH_TYPE,
+			DIFF_DEPTH_TYPE
+		}
 } = require('../endpoints');
 
  
@@ -40,7 +53,7 @@ const {
 	  "M": true         // Ignore
  *	}
  */
-const openAggTradeStream = symbol => generateStream(AGG_TRADE, symbol);
+const openAggTradeStream = (emitter, symbol) => generateStream(emitter, AGG_TRADE_TYPE, AGG_TRADE, symbol);
 
 
 /*
@@ -63,7 +76,7 @@ const openAggTradeStream = symbol => generateStream(AGG_TRADE, symbol);
 	  "M": true         // Ignore
  *	}
  */
-const openTradeStream = symbol => generateStream(TRADE, symbol);
+const openTradeStream = (emitter, symbol) => generateStream(emitter, TRADE_TYPE, TRADE, symbol);
 
 
 /*
@@ -97,7 +110,7 @@ const openTradeStream = symbol => generateStream(TRADE, symbol);
 	  }
  *	}
  */
-const openKlineStream = (symbol, interval) => generateStream(KLINE, symbol, interval)
+const openKlineStream = (emitter, symbol, interval) => generateStream(emitter, KLINE_TYPE, KLINE, symbol, interval)
 
 
 /*
@@ -119,7 +132,7 @@ const openKlineStream = (symbol, interval) => generateStream(KLINE, symbol, inte
     "q": "18"               // Total traded quote asset volume
  * }
  */
-const openMiniTickerStream = symbol => generateStream(MINI, symbol);
+const openMiniTickerStream = (emitter, symbol) => generateStream(emitter, MINI_TYPE, MINI, symbol);
 
 
 /*
@@ -141,7 +154,7 @@ const openMiniTickerStream = symbol => generateStream(MINI, symbol);
     "q": "18"               // Total traded quote asset volume
  * }
  */
-const openAllMarketMiniTickerStream = () => generateStream(ALL_MINI);
+const openAllMarketMiniTickerStream = (emitter) => generateStream(emitter, ALL_MINI_TYPE, ALL_MINI);
 
 
 /*
@@ -177,7 +190,8 @@ const openAllMarketMiniTickerStream = () => generateStream(ALL_MINI);
 	  "n": 18151          // Total number of trades
  *	}
  */
-const openTickerStream = symbol => generateStream(TICKER, symbol);
+const openTickerStream = (emitter, symbol) => generateStream(emitter, TICKER_TYPE, TICKER, symbol);
+
 
 
 /*
@@ -213,7 +227,7 @@ const openTickerStream = symbol => generateStream(TICKER, symbol);
 	  "n": 18151          // Total number of trades
  *	}
  */
-const openAllMarketTickerStream = () => generateStream(ALL_TICKER);
+const openAllMarketTickerStream = emitter => generateStream(emitter, ALL_TICKER_TYPE, ALL_TICKER);
 
 
 /*
@@ -240,7 +254,7 @@ const openAllMarketTickerStream = () => generateStream(ALL_TICKER);
 	  ]
  *	}
  */
-const openPartialBookDepthStream = (symbol, levels) => generateStream(PARTIAL_BOOK_DEPTH, symbol, levels);
+const openPartialBookDepthStream = (emitter, symbol, levels) => generateStream(emitter, PARTIAL_BOOK_DEPTH_TYPE, PARTIAL_BOOK_DEPTH, symbol, levels);
 
 
 /*
@@ -271,7 +285,7 @@ const openPartialBookDepthStream = (symbol, levels) => generateStream(PARTIAL_BO
 	  ]
  *	}
  */
-const openDiffDepthStream = symbol => generateStream(DIFF_DEPTH, symbol);
+const openDiffDepthStream = (emitter, symbol) => generateStream(emitter, DIFF_DEPTH_TYPE, DIFF_DEPTH, symbol);
 
 
 module.exports = {

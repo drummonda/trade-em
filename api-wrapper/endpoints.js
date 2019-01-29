@@ -68,5 +68,17 @@ module.exports = {
 		ALL_TICKER: generateAllMarketTickerStream,
 		PARTIAL_BOOK_DEPTH: generatePartialBookDepthStream,
 		DIFF_DEPTH: generateDiffDepthStream
+	},
+	STREAM_TYPE: {
+		BASE_TYPE: 'BASE',
+		AGG_TRADE_TYPE: 'AGG_TRADE',
+		TRADE_TYPE: 'TRADE',
+		KLINE_TYPE: 'KLINE',
+		MINI_TYPE: 'MINI',
+		ALL_MINI_TYPE: 'ALL_MINI',
+		TICKER_TYPE: 'TICKER',
+		ALL_TICKER_TYPE: 'ALL_TICKER',
+		PARTIAL_BOOK_DEPTH_TYPE: 'PARTIAL_BOOK_DEPTH',
+		DIFF_DEPTH_TYPE: 'DIFF_DEPTH'
 	}
 }
